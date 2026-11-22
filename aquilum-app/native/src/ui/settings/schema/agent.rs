@@ -31,7 +31,7 @@ pub(super) fn agent(config: &AppConfig, ctx: &Context) -> Vec<Block> {
             Some(t("settings.agent.apiKeyHint")),
             Control::Text {
                 value: config.agent.api_key.clone(),
-                commit: true,
+                commit: false,
             },
             |c, v| c.agent.api_key = text(v),
         ),
@@ -100,10 +100,10 @@ fn model_row(config: &AppConfig, models: &CursorModels) -> Row {
         CursorModels::Failed(error) => info(
             label,
             Some(t_with("settings.agent.modelFailed", &[("error", error)])),
-            Control::Dropdown {
-                options: vec![t("settings.agent.modelLocked")],
-                selected: 0,
-            },
+            Control::Buttons(vec![Button::new(
+                t("settings.agent.modelRetry"),
+                Action::RefreshCursorModels,
+            )]),
         ),
         CursorModels::Ready(items) => {
             let mut ids = vec![String::new()];

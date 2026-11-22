@@ -323,6 +323,7 @@
       "modelLocked": "API key required",
       "modelLoading": "Loading models…",
       "modelFailed": "Could not load models: {{error}}",
+      "modelRetry": "Retry",
       "modelDefault": "Account default",
       "skillsFolder": "Skills folder",
       "skillsFolderHint": "Inside the knowledge base, same idea as Templates and Files",

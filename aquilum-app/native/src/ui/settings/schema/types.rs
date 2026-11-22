@@ -77,6 +77,7 @@ pub enum Action {
     TrashPage(usize),
     CreateTemplates,
     CreateSkills,
+    RefreshCursorModels,
     NewToken,
     Copy(usize, String),
     OpenUrl(String),

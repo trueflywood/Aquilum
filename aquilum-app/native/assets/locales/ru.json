@@ -325,6 +325,7 @@
       "modelLocked": "Нужен API key",
       "modelLoading": "Загрузка моделей…",
       "modelFailed": "Не удалось загрузить модели: {{error}}",
+      "modelRetry": "Повторить",
       "modelDefault": "Дефолт аккаунта",
       "skillsFolder": "Папка Skills",
       "skillsFolderHint": "Внутри базы знаний, как Templates и Files",

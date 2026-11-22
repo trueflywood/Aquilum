@@ -8,7 +8,7 @@ use crate::chat::{self, CursorModel, CursorModels};
 use crate::ui::settings::schema::Section;
 
 pub(super) struct CursorModelsState {
-    key: String,
+    pub(super) key: String,
     pub(super) status: CursorModels,
     tx: Sender<(String, Result<Vec<CursorModel>, String>)>,
     rx: Receiver<(String, Result<Vec<CursorModel>, String>)>,
@@ -42,6 +42,11 @@ impl App {
             self.cursor_models.status = CursorModels::Locked;
             return;
         }
+        if !looks_like_cursor_key(&key) {
+            self.cursor_models.key.clear();
+            self.cursor_models.status = CursorModels::Locked;
+            return;
+        }
         if self.cursor_models.key == key
             && matches!(
                 self.cursor_models.status,
@@ -56,6 +61,9 @@ impl App {
         let wake = Arc::clone(&self.workspace.wake);
         std::thread::spawn(move || {
             let result = chat::list_models(&key);
+            if let Err(error) = &result {
+                report!("модели Cursor не загружены: {error}");
+            }
             let _ = tx.send((key, result));
             wake();
         });
@@ -76,4 +84,10 @@ impl App {
         };
         self.refresh_section(root, Section::Agent);
     }
+}
+
+fn looks_like_cursor_key(key: &str) -> bool {
+    let key = key.trim();
+    key.len() >= 20
+        && (key.starts_with("grok_") || key.starts_with("crsr_") || key.starts_with("cursor_") || key.starts_with("key_"))
 }

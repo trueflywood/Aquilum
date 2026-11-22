@@ -77,6 +77,11 @@ impl App {
                 crate::chat::write_starters(core, &folder);
                 Effect::Content
             }
+            Action::RefreshCursorModels => {
+                self.cursor_models.key.clear();
+                self.request_cursor_models();
+                Effect::Content
+            }
             Action::CheckUpdates => {
                 self.updater.check();
                 Effect::Content
