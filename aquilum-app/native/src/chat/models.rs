@@ -77,7 +77,10 @@ fn fetch(key: &str, basic: bool) -> Result<Vec<CursorModel>, String> {
     } else {
         request.set("Authorization", &format!("Bearer {key}"))
     };
-    let response = request.call().map_err(|error| error.to_string())?;
+    let response = match request.call() {
+        Ok(response) => response,
+        Err(error) => return Err(format_ureq(error)),
+    };
     if !(200..300).contains(&response.status()) {
         return Err(format!("HTTP {}", response.status()));
     }
@@ -106,6 +109,29 @@ fn fetch(key: &str, basic: bool) -> Result<Vec<CursorModel>, String> {
         return Err("empty list".into());
     }
     Ok(models)
+}
+
+fn format_ureq(error: ureq::Error) -> String {
+    match error {
+        ureq::Error::Status(status, response) => {
+            let body = response.into_string().unwrap_or_default();
+            let body = body.trim();
+            if let Ok(value) = serde_json::from_str::<serde_json::Value>(body) {
+                let code = value.get("code").and_then(|v| v.as_str()).unwrap_or("");
+                let message = value.get("message").and_then(|v| v.as_str()).unwrap_or(body);
+                if code.is_empty() {
+                    format!("HTTP {status}: {message}")
+                } else {
+                    format!("HTTP {status} ({code}): {message}")
+                }
+            } else if body.is_empty() {
+                format!("HTTP {status}")
+            } else {
+                format!("HTTP {status}: {body}")
+            }
+        }
+        other => other.to_string(),
+    }
 }
 
 fn push_model(models: &mut Vec<CursorModel>, id: String, label: String) {

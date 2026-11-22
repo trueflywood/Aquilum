@@ -97,14 +97,21 @@ fn model_row(config: &AppConfig, models: &CursorModels) -> Row {
                 selected: 0,
             },
         ),
-        CursorModels::Failed(error) => info(
-            label,
-            Some(t_with("settings.agent.modelFailed", &[("error", error)])),
-            Control::Buttons(vec![Button::new(
-                t("settings.agent.modelRetry"),
-                Action::RefreshCursorModels,
-            )]),
-        ),
+        CursorModels::Failed(error) => {
+            let hint = if error.contains("403") {
+                t_with("settings.agent.modelForbidden", &[("error", error)])
+            } else {
+                t_with("settings.agent.modelFailed", &[("error", error)])
+            };
+            info(
+                label,
+                Some(hint),
+                Control::Buttons(vec![Button::new(
+                    t("settings.agent.modelRetry"),
+                    Action::RefreshCursorModels,
+                )]),
+            )
+        }
         CursorModels::Ready(items) => {
             let mut ids = vec![String::new()];
             let mut options = vec![t("settings.agent.modelDefault")];

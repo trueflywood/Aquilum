@@ -323,6 +323,7 @@
       "modelLocked": "API key required",
       "modelLoading": "Loading models…",
       "modelFailed": "Could not load models: {{error}}",
+      "modelForbidden": "Cursor rejected this key for Cloud Agents (HTTP 403). New grok_ keys often do that. Copy the full key from the create dialog (not the table), or keep using the local planner. Detail: {{error}}",
       "modelRetry": "Retry",
       "modelDefault": "Account default",
       "skillsFolder": "Skills folder",

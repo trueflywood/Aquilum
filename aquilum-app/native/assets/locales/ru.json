@@ -325,6 +325,7 @@
       "modelLocked": "Нужен API key",
       "modelLoading": "Загрузка моделей…",
       "modelFailed": "Не удалось загрузить модели: {{error}}",
+      "modelForbidden": "Cursor отклонил ключ для Cloud Agents (HTTP 403). У новых ключей grok_ так бывает. Скопируйте полный ключ из окна создания (не из таблицы) или пользуйтесь локальным планировщиком. Детали: {{error}}",
       "modelRetry": "Повторить",
       "modelDefault": "Дефолт аккаунта",
       "skillsFolder": "Папка Skills",

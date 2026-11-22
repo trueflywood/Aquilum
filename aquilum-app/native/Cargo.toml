@@ -1,6 +1,6 @@
 [package]
 name = "aquilum-native"
-version = "0.3.31"
+version = "0.3.32"
 description = "Aquilum native UI (Masonry on winit + vello_cpu), no WebView"
 authors = ["Dmitriy Chaplinskiy"]
 license = "AGPL-3.0-only"
@@ -51,6 +51,7 @@ bytemuck = "1"
 flate2 = "1"
 roxmltree = "0.21"
 base64 = "0.22"
+ureq = "2.12"
 minisign-verify = "0.2"
 foldhash = "0.2"
 unicode-segmentation = "1"
