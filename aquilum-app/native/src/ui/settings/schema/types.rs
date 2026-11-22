@@ -59,6 +59,7 @@ pub enum Action {
     Restore(String),
     TrashPage(usize),
     CreateTemplates,
+    CreateSkills,
     NewToken,
     Copy(usize, String),
     OpenUrl(String),

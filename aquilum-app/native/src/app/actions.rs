@@ -37,6 +37,9 @@ impl App {
         if let Some(outcome) = self.on_panel_action(root, id, &action) {
             return outcome;
         }
+        if let Some(outcome) = self.on_chat_action(root, id, &action) {
+            return outcome;
+        }
         if let Some(outcome) = self.on_history_action(root, id, &action) {
             return outcome;
         }

@@ -21,6 +21,7 @@ pub fn run(core: &Core, request: &Request) -> Listing {
     let notice = |key: &str| Listing { generation: request.generation, items: Vec::new(), notice: Some(t(key)) };
     match (request.mode, request.method) {
         (Mode::History, _) => listing(Vec::new(), "history.empty"),
+        (Mode::Chat, _) => listing(Vec::new(), "chat.empty"),
         (Mode::Backlinks, _) => {
             let items = core.search.backlinks(&workspace, &document).unwrap_or_default();
             let items = counted(items.into_iter().map(|link| (link.title, Target::Note(PathBuf::from(link.path), Some(link.offset)))));

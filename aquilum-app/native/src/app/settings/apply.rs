@@ -71,6 +71,12 @@ impl App {
                 crate::app::templates::write_starters(core, &schema::templates_path(&workspace, &core.settings.get_config().templates.folder));
                 Effect::Content
             }
+            Action::CreateSkills => {
+                let Some(workspace) = workspace else { return Effect::None };
+                let folder = schema::skills_path(&workspace, &core.settings.get_config().agent.skills.folder);
+                crate::chat::write_starters(core, &folder);
+                Effect::Content
+            }
             Action::CheckUpdates => {
                 self.updater.check();
                 Effect::Content
@@ -137,11 +143,13 @@ impl App {
                 let smart = crate::ui::editor::Smart::from_config(&after);
                 let smart_changed = smart != crate::ui::editor::Smart::from_config(&before);
                 crate::ui::motion::set(after.ui.animations);
+                let agent_changed = before.agent != after.agent;
                 let rows_changed = before.ui.animations != after.ui.animations
                     || (before.ui.theme == "night") != (after.ui.theme == "night")
                     || before.analysis.enable_bm25f != after.analysis.enable_bm25f
                     || before.updates.auto != after.updates.auto
                     || before.templates.folder != after.templates.folder
+                    || agent_changed
                     || mcp_changed
                     || retention;
                 if let Err(error) = core.settings.update_config(after) {
@@ -160,7 +168,7 @@ impl App {
                     Effect::Restyle(fonts_changed, rows_changed)
                 } else if rows_changed {
                     Effect::Content
-                } else if analysis_changed {
+                } else if analysis_changed || agent_changed {
                     Effect::Panel
                 } else if smart_changed {
                     Effect::Smart(smart)
@@ -172,7 +180,7 @@ impl App {
     }
 
     pub(super) fn refresh_analysis(&mut self, root: &mut RenderRoot) {
-        if self.panel_mode() == crate::links::Mode::Analysis {
+        if matches!(self.panel_mode(), crate::links::Mode::Analysis | crate::links::Mode::Chat) {
             self.request_panel(root);
         }
     }

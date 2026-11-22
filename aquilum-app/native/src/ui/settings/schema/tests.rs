@@ -35,9 +35,22 @@ fn templates_path_and_trash_size() {
     assert_eq!(templates_path(workspace, "Шаблоны/"), workspace.join("Шаблоны"));
     assert_eq!(templates_path(workspace, "/Шаблоны/"), PathBuf::from("/Шаблоны"));
     assert_eq!(templates_path(workspace, "D:\\T\\"), PathBuf::from("D:\\T"));
+    assert_eq!(skills_path(workspace, ""), workspace.join("Skills"));
+    assert_eq!(skills_path(workspace, "Навыки/"), workspace.join("Навыки"));
+    assert_eq!(skills_path(workspace, "/Skills"), PathBuf::from("/Skills"));
     i18n::set_language("ru");
     assert_eq!(format_size(512), "512 Б");
     assert_eq!(format_size(1_572_864), "1,5 МБ");
+}
+
+#[test]
+fn agent_section_offers_skills_create_when_folder_missing() {
+    let config = AppConfig::default();
+    let mut ctx = Context::new(1.0);
+    ctx.workspace = Some(PathBuf::from("/tmp/aquilum-missing-base"));
+    let labels: Vec<String> = blocks(Section::Agent, &config, &ctx).into_iter().flat_map(|b| b.rows).map(|r| r.label).collect();
+    assert!(labels.contains(&t("settings.agent.enabled")));
+    assert!(labels.contains(&t("settings.agent.skillsCreate")));
 }
 
 #[test]
@@ -61,7 +74,7 @@ fn templates_and_attachments_share_one_section_and_search_tuning_lives_with_bm25
         assert_eq!(Section::from_key(old), Some(Section::Data), "сохранённый раздел «{old}» открывает общий раздел");
     }
     assert_eq!(Section::from_key("search"), Some(Section::Analysis));
-    assert_eq!(Section::ALL.len(), 11);
+    assert_eq!(Section::ALL.len(), 12);
 
     let rows = |config: &AppConfig| blocks(Section::Analysis, config, &ctx).into_iter().flat_map(|b| b.rows).map(|r| r.label).collect::<Vec<_>>();
     let pool = t("settings.search.candidatePool");

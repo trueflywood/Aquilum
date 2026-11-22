@@ -5,6 +5,7 @@ mod caches;
 pub(crate) use caches::Moment;
 mod commands;
 mod book;
+mod chat;
 mod confirm;
 mod core_events;
 mod embeds;
@@ -60,6 +61,7 @@ use crate::ui::{self, Chrome, ROOT_TAG};
 use crate::file_ops;
 use crate::interface::{Interface, SCALE_STEP};
 use crate::links::Listing;
+use crate::chat::{ChatBindings, ChatState};
 use crate::ui::backlinks::{Body, HistoryBody, VersionView};
 use crate::ui::titlebar::WindowButton;
 use crate::note::Note;
@@ -145,6 +147,8 @@ pub struct App {
     resizing: Option<(crate::interface::Side, f64, f64)>,
     history: Option<history::HistoryState>,
     history_body: Option<HistoryBody>,
+    chat: ChatState,
+    chat_body: Option<ChatBindings>,
     opened_versions: HashMap<Uuid, crate::history::Version>,
     version_view: Option<VersionView>,
     version_notice: Option<String>,

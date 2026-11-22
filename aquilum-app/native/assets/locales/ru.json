@@ -99,7 +99,20 @@
     "outgoingTitle": "Ссылки на другие документы",
     "empty": "Нет упоминаний со ссылкой",
     "outgoingEmpty": "Нет ссылок на другие документы",
-    "historyTab": "История"
+    "historyTab": "История",
+    "chatTab": "Чат"
+  },
+  "chat": {
+    "title": "Чат",
+    "empty": "Спросите о заметках или попросите их изменить",
+    "placeholder": "Сообщение…",
+    "send": "Отправить",
+    "clear": "Очистить чат",
+    "disabled": "Включите агента в Настройки → Cursor",
+    "busy": "Думаю…",
+    "welcome": "Чат внутри Aquilum. Skills лежат в папке Skills этой базы знаний.",
+    "noBase": "Откройте базу знаний, чтобы пользоваться чатом",
+    "toolLine": "Инструмент: {{name}}"
   },
   "history": {
     "title": "История",
@@ -185,6 +198,7 @@
       "data": "Данные",
       "analysis": "Анализ",
       "mcp": "ИИ-агенты",
+      "agent": "Cursor",
       "history": "История",
       "trash": "Корзина",
       "sync": "Синхронизация",
@@ -295,6 +309,20 @@
       "claudeHint": "Выполните команду в терминале",
       "codexHint": "Добавьте в ~/.codex/config.toml",
       "geminiHint": "Добавьте в ~/.gemini/settings.json"
+    },
+    "agent": {
+      "section": "Чат Cursor в приложении",
+      "enabled": "Включить чат-агента",
+      "enabledHint": "Пятый таб правой панели. Без API-ключа работает локальный планировщик; с ключом может вызывать Cursor Cloud Agents",
+      "apiKey": "API-ключ Cursor",
+      "apiKeyHint": "Cursor Dashboard → API Keys. Пустое поле — только локальный планировщик",
+      "model": "Model id",
+      "modelHint": "Необязательно. Для Cursor Cloud Agents",
+      "skillsFolder": "Папка Skills",
+      "skillsFolderHint": "Внутри базы знаний, как Templates и Files",
+      "skillsCreate": "Создать папку Skills",
+      "skillsCreateHint": "Создаст «{{folder}}» в базе со стартовыми skills",
+      "skillsCreateButton": "Создать"
     },
     "system": {
       "autostart": "Автозапуск",

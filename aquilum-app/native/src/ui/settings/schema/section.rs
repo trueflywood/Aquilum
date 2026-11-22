@@ -10,6 +10,7 @@ pub enum Section {
     Analysis,
     #[cfg_attr(target_os = "android", allow(dead_code))]
     Mcp,
+    Agent,
     History,
     Trash,
     Sync,
@@ -26,6 +27,7 @@ impl Section {
         Section::Analysis,
         #[cfg(not(target_os = "android"))]
         Section::Mcp,
+        Section::Agent,
         Section::History,
         Section::Trash,
         Section::Sync,
@@ -41,6 +43,7 @@ impl Section {
             Section::Data => "data",
             Section::Analysis => "analysis",
             Section::Mcp => "mcp",
+            Section::Agent => "agent",
             Section::History => "history",
             Section::Trash => "trash",
             Section::Sync => "sync",
@@ -70,6 +73,7 @@ impl Section {
             Section::Data => icons::FOLDER,
             Section::Analysis => icons::GRAPH_ANALYSIS,
             Section::Mcp => icons::PLUG,
+            Section::Agent => icons::MESSAGE,
             Section::History => icons::HISTORY,
             Section::Trash => icons::TRASH,
             Section::Sync => icons::CLOUD,

@@ -6,6 +6,7 @@ pub enum Mode {
     Outgoing,
     Analysis,
     History,
+    Chat,
 }
 
 impl Mode {
@@ -15,11 +16,14 @@ impl Mode {
             Mode::Outgoing => "outgoing",
             Mode::Analysis => "analysis",
             Mode::History => "history",
+            Mode::Chat => "chat",
         }
     }
 
     pub fn from_key(key: &str) -> Option<Mode> {
-        [Mode::Backlinks, Mode::Outgoing, Mode::Analysis, Mode::History].into_iter().find(|m| m.key() == key)
+        [Mode::Backlinks, Mode::Outgoing, Mode::Analysis, Mode::History, Mode::Chat]
+            .into_iter()
+            .find(|m| m.key() == key)
     }
 }
 

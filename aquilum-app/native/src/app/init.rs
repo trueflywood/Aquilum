@@ -49,6 +49,8 @@ impl App {
             resizing: None,
             history: None,
             history_body: None,
+            chat: Default::default(),
+            chat_body: None,
             opened_versions: HashMap::new(),
             version_view: None,
             version_notice: None,

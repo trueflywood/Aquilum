@@ -10,6 +10,7 @@ mod android;
 mod args;
 mod autostart;
 mod app;
+mod chat;
 mod clipboard;
 mod cover;
 mod poster;

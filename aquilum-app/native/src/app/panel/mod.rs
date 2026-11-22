@@ -70,6 +70,13 @@ impl App {
             }
             return;
         }
+        if self.panel_mode() == Mode::Chat {
+            self.update_mode_buttons(root);
+            if self.panel_visible() {
+                self.render_chat(root);
+            }
+            return;
+        }
         let document = self.tabs.active().path.clone();
         if let (true, Some(workspace), Some(document)) = (self.panel_visible(), self.tree.root(), document) {
             let (mode, method) = (self.panel_mode(), self.panel_method());
@@ -98,6 +105,10 @@ impl App {
         let mode = self.panel_mode();
         if mode == Mode::History {
             self.render_history(root);
+            return;
+        }
+        if mode == Mode::Chat {
+            self.render_chat(root);
             return;
         }
         let Some(chrome) = &self.chrome else { return };

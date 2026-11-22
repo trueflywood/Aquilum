@@ -97,7 +97,20 @@
     "outgoingTitle": "Links to other documents",
     "empty": "No linked mentions",
     "outgoingEmpty": "No links to other documents",
-    "historyTab": "History"
+    "historyTab": "History",
+    "chatTab": "Chat"
+  },
+  "chat": {
+    "title": "Chat",
+    "empty": "Ask about your notes or ask to change them",
+    "placeholder": "Message…",
+    "send": "Send",
+    "clear": "Clear chat",
+    "disabled": "Enable the agent in Settings → Cursor",
+    "busy": "Working…",
+    "welcome": "Chat inside Aquilum. Skills live in the Skills folder of this knowledge base.",
+    "noBase": "Open a knowledge base to use chat",
+    "toolLine": "Tool: {{name}}"
   },
   "history": {
     "title": "History",
@@ -183,6 +196,7 @@
       "data": "Data",
       "analysis": "Analysis",
       "mcp": "AI agents",
+      "agent": "Cursor",
       "history": "History",
       "trash": "Trash",
       "sync": "Sync",
@@ -293,6 +307,20 @@
       "claudeHint": "Run the command in a terminal",
       "codexHint": "Add to ~/.codex/config.toml",
       "geminiHint": "Add to ~/.gemini/settings.json"
+    },
+    "agent": {
+      "section": "In-app Cursor chat",
+      "enabled": "Enable chat agent",
+      "enabledHint": "Fifth tab on the right panel. Works without an API key via a local planner; with a key it can call Cursor Cloud Agents",
+      "apiKey": "Cursor API key",
+      "apiKeyHint": "From Cursor Dashboard → API Keys. Leave empty for the local planner",
+      "model": "Model id",
+      "modelHint": "Optional. Used when talking to Cursor Cloud Agents",
+      "skillsFolder": "Skills folder",
+      "skillsFolderHint": "Inside the knowledge base, same idea as Templates and Files",
+      "skillsCreate": "Create Skills folder",
+      "skillsCreateHint": "Creates «{{folder}}» in the knowledge base with starter skills",
+      "skillsCreateButton": "Create"
     },
     "system": {
       "autostart": "Startup",

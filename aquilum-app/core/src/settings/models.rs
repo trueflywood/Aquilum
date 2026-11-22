@@ -218,6 +218,7 @@ impl Default for McpSettings {
 pub struct AppConfig {
     pub analysis: AnalysisSettings,
     pub mcp: McpSettings,
+    pub agent: AgentSettings,
     pub trash: TrashSettings,
     pub history: HistorySettings,
     pub search: SearchIndexSettings,
@@ -227,6 +228,40 @@ pub struct AppConfig {
     pub templates: TemplateSettings,
     pub files: FilesSettings,
     pub updates: UpdateSettings,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", default)]
+pub struct AgentSettings {
+    pub enabled: bool,
+    pub api_key: String,
+    pub model: String,
+    pub skills: SkillsSettings,
+}
+
+impl Default for AgentSettings {
+    fn default() -> Self {
+        Self {
+            enabled: true,
+            api_key: String::new(),
+            model: String::new(),
+            skills: SkillsSettings::default(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", default)]
+pub struct SkillsSettings {
+    pub folder: String,
+}
+
+impl Default for SkillsSettings {
+    fn default() -> Self {
+        Self {
+            folder: "Skills".to_string(),
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]

@@ -32,6 +32,7 @@ pub fn panel(mode: Mode, has_analysis: bool, width: f64, open: bool, from: bool)
         entries.push((Mode::Analysis, icons::GRAPH_ANALYSIS, t("analysis.tab")));
     }
     entries.push((Mode::History, icons::HISTORY, t("backlinks.historyTab")));
+    entries.push((Mode::Chat, icons::MESSAGE, t("backlinks.chatTab")));
     for (item, icon, label) in entries {
         let button = NewWidget::new(IconButton::mode(icon, label, item == mode));
         modes.push((Handle::of(&button), item));
