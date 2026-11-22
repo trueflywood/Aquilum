@@ -1,3 +1,6 @@
+use std::sync::mpsc::{Receiver, Sender, channel};
+use std::sync::Arc;
+
 use masonry::app::RenderRoot;
 use masonry::core::{ErasedAction, WidgetId};
 
@@ -7,6 +10,23 @@ use crate::ui::editor::{TextAction, TextEditor};
 use crate::ui::search::Placeholder;
 use crate::ui::settings::schema;
 use crate::ui::widgets::{Pressed, Slot};
+
+pub(super) struct ChatCloudState {
+    tx: Sender<CloudOutcome>,
+    rx: Receiver<CloudOutcome>,
+}
+
+struct CloudOutcome {
+    generation: u64,
+    result: Result<chat::CloudReply, String>,
+}
+
+impl Default for ChatCloudState {
+    fn default() -> Self {
+        let (tx, rx) = channel();
+        Self { tx, rx }
+    }
+}
 
 impl App {
     pub(super) fn render_chat(&mut self, root: &mut RenderRoot) {
@@ -53,6 +73,35 @@ impl App {
         None
     }
 
+    pub(super) fn poll_chat_cloud(&mut self, root: &mut RenderRoot) {
+        let mut latest = None;
+        while let Ok(message) = self.chat_cloud.rx.try_recv() {
+            latest = Some(message);
+        }
+        let Some(outcome) = latest else { return };
+        if outcome.generation != self.chat.generation || !self.chat.busy {
+            return;
+        }
+        match outcome.result {
+            Ok(reply) => {
+                self.chat.cloud_agent_id = Some(reply.agent_id);
+                self.chat.messages.push(Message {
+                    role: Role::Assistant,
+                    content: reply.text,
+                });
+            }
+            Err(error) => {
+                report!("Cursor Cloud Agents: {error}");
+                self.chat.messages.push(Message {
+                    role: Role::System,
+                    content: crate::i18n::t_with("chat.cloudError", &[("error", &error)]),
+                });
+            }
+        }
+        self.chat.busy = false;
+        self.render_chat(root);
+    }
+
     fn send_chat(&mut self, root: &mut RenderRoot) {
         if self.chat.busy {
             return;
@@ -94,17 +143,40 @@ impl App {
 
         let folder = schema::skills_path(&workspace, &config.agent.skills.folder);
         let skills = chat::load_skills(&folder);
-        let turn = chat::run_turn(&self.workspace.core, &workspace, &text, &skills);
-        self.chat.messages.extend(turn.messages);
-        self.chat.busy = false;
-        self.render_chat(root);
-        if !turn.changed_paths.is_empty() {
-            self.tree.reload(root);
+        let api_key = config.agent.api_key.trim().to_owned();
+        if api_key.is_empty() {
+            let turn = chat::run_turn(&self.workspace.core, &workspace, &text, &skills);
+            self.chat.messages.extend(turn.messages);
+            self.chat.busy = false;
+            self.render_chat(root);
+            if !turn.changed_paths.is_empty() {
+                self.tree.reload(root);
+            }
+            return;
         }
+
+        let prompt = chat::prompt_context(&self.workspace.core, &workspace, &text, &skills);
+        let model = config.agent.model.clone();
+        let agent_id = self.chat.cloud_agent_id.clone();
+        self.chat.generation = self.chat.generation.wrapping_add(1);
+        let generation = self.chat.generation;
+        let tx = self.chat_cloud.tx.clone();
+        let wake = Arc::clone(&self.workspace.wake);
+        std::thread::spawn(move || {
+            let result = chat::ask_cloud(&api_key, &model, agent_id.as_deref(), &prompt);
+            if let Err(error) = &result {
+                report!("Cursor Cloud Agents: {error}");
+            }
+            let _ = tx.send(CloudOutcome { generation, result });
+            wake();
+        });
     }
 
     fn clear_chat(&mut self, root: &mut RenderRoot) {
-        self.chat = ChatState::default();
+        self.chat = ChatState {
+            generation: self.chat.generation.wrapping_add(1),
+            ..ChatState::default()
+        };
         self.render_chat(root);
     }
 }

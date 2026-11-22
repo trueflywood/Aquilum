@@ -1,4 +1,5 @@
 mod agent;
+mod cloud;
 mod models;
 mod skills;
 mod ui;
@@ -9,7 +10,8 @@ use crate::ui::editor::TextEditor;
 use crate::ui::handle::Handle;
 use crate::ui::search::Placeholder;
 
-pub use agent::run_turn;
+pub use agent::{prompt_context, run_turn};
+pub use cloud::{CloudReply, ask as ask_cloud};
 pub use models::{CursorModel, CursorModels, choice_at, list as list_models, set_choices};
 pub use skills::{Skill, load_skills, write_starters};
 pub use ui::{ChatBody, body};
@@ -33,6 +35,8 @@ pub struct ChatState {
     pub messages: Vec<Message>,
     pub busy: bool,
     pub draft: String,
+    pub cloud_agent_id: Option<String>,
+    pub generation: u64,
 }
 
 pub struct ChatBindings {

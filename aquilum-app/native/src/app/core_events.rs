@@ -30,6 +30,7 @@ impl App {
         self.poll_reader(root);
         self.poll_cloud(root);
         self.poll_cursor_models(root);
+        self.poll_chat_cloud(root);
         let mut links_changed = false;
         let mut history_changed = false;
         let mut changed = Vec::new();

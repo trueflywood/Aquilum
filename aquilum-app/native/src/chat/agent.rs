@@ -14,6 +14,59 @@ pub struct Turn {
     pub changed_paths: Vec<PathBuf>,
 }
 
+pub fn prompt_context(core: &Core, workspace: &Path, user_text: &str, skills: &[Skill]) -> String {
+    let mut parts = Vec::new();
+    parts.push(
+        "Ты помощник базы знаний Aquilum. Отвечай кратко на языке пользователя. \
+Не создавай файлы и не предлагай git/PR — у тебя нет репозитория. \
+Опирайся на контекст ниже; если его мало, честно скажи об этом."
+            .to_owned(),
+    );
+
+    let active: Vec<&Skill> = skills.iter().filter(|s| s.enabled).collect();
+    if let Some(skill) = pick_skill(&active, user_text) {
+        let instructions = skill.instructions.trim();
+        let body = if instructions.is_empty() {
+            format!("Skill «{}»: {}", skill.name, skill.description.trim())
+        } else {
+            format!(
+                "Skill «{}»: {}\n\n{}",
+                skill.name,
+                skill.description.trim(),
+                instructions.chars().take(2500).collect::<String>()
+            )
+        };
+        parts.push(body);
+    }
+
+    let query = user_text
+        .split(|c: char| !c.is_alphanumeric() && c != '-' && c != '_')
+        .filter(|w| w.chars().count() > 2)
+        .take(8)
+        .collect::<Vec<_>>()
+        .join(" ");
+    let query = if query.is_empty() {
+        user_text.trim().to_owned()
+    } else {
+        query
+    };
+    let hits = search(core, workspace, &query);
+    if hits.is_empty() {
+        parts.push(format!("Поиск по базе («{query}»): совпадений нет."));
+    } else {
+        let lines = hits
+            .iter()
+            .take(8)
+            .map(|(path, title, snippet)| format!("- {title} (`{path}`): {snippet}"))
+            .collect::<Vec<_>>()
+            .join("\n");
+        parts.push(format!("Фрагменты из базы по «{query}»:\n{lines}"));
+    }
+
+    parts.push(format!("Сообщение пользователя:\n{}", user_text.trim()));
+    parts.join("\n\n")
+}
+
 pub fn run_turn(core: &Core, workspace: &Path, user_text: &str, skills: &[Skill]) -> Turn {
     let text = user_text.trim();
     let mut out = Vec::new();

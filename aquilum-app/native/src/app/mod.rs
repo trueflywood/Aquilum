@@ -150,6 +150,7 @@ pub struct App {
     history_body: Option<HistoryBody>,
     chat: ChatState,
     chat_body: Option<ChatBindings>,
+    chat_cloud: chat::ChatCloudState,
     cursor_models: cursor_models::CursorModelsState,
     opened_versions: HashMap<Uuid, crate::history::Version>,
     version_view: Option<VersionView>,

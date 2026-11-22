@@ -110,7 +110,8 @@
     "busy": "Working…",
     "welcome": "Chat inside Aquilum. Skills live in the Skills folder of this knowledge base.",
     "noBase": "Open a knowledge base to use chat",
-    "toolLine": "Tool: {{name}}"
+    "toolLine": "Tool: {{name}}",
+    "cloudError": "Cursor API: {{error}}"
   },
   "history": {
     "title": "History",
