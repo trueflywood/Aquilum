@@ -81,7 +81,7 @@ fn create(api_key: &str, model: &str, prompt: &str) -> Result<CloudReply, String
         Ok(value) => parse_create(&value)?,
         Err(basic_error) => match post_json_bearer(api_key, AGENTS, &body) {
             Ok(value) => parse_create(&value)?,
-            Err(bearer_error) => return Err(format!("{basic_error}; bearer: {bearer_error}")),
+            Err(bearer_error) => return Err(combine_auth_errors(&basic_error, &bearer_error)),
         },
     };
     let text = poll_result(api_key, &agent_id, &run_id)?;
@@ -97,7 +97,7 @@ fn follow_up(api_key: &str, agent_id: &str, prompt: &str) -> Result<CloudReply, 
         Ok(value) => parse_follow_up(&value)?,
         Err(basic_error) => match post_json_bearer(api_key, &url, &body) {
             Ok(value) => parse_follow_up(&value)?,
-            Err(bearer_error) => return Err(format!("{basic_error}; bearer: {bearer_error}")),
+            Err(bearer_error) => return Err(combine_auth_errors(&basic_error, &bearer_error)),
         },
     };
     let text = poll_result(api_key, agent_id, &run_id)?;
@@ -115,7 +115,7 @@ fn poll_result(api_key: &str, agent_id: &str, run_id: &str) -> Result<String, St
             Ok(value) => parse_run(&value)?,
             Err(basic_error) => match get_json_bearer(api_key, &url) {
                 Ok(value) => parse_run(&value)?,
-                Err(bearer_error) => return Err(format!("{basic_error}; bearer: {bearer_error}")),
+                Err(bearer_error) => return Err(combine_auth_errors(&basic_error, &bearer_error)),
             },
         };
         if is_terminal(&run.status) {
@@ -258,11 +258,55 @@ fn format_ureq(error: ureq::Error) -> String {
     }
 }
 
+fn combine_auth_errors(basic: &str, bearer: &str) -> String {
+    let basic_code = error_code(basic);
+    let bearer_code = error_code(bearer);
+    if !basic_code.is_empty() && basic_code == bearer_code {
+        return friendly_error(basic_code, basic);
+    }
+    if basic == bearer {
+        return friendly_error(basic_code, basic);
+    }
+    format!("{basic}; bearer: {bearer}")
+}
+
+fn friendly_error(code: &str, fallback: &str) -> String {
+    match code {
+        "usage_limit_exceeded" => "USAGE_LIMIT".into(),
+        "key_not_supported" => "KEY_NOT_SUPPORTED".into(),
+        "insufficient_credits" => "USAGE_LIMIT".into(),
+        _ if fallback.contains("usage_limit_exceeded") => "USAGE_LIMIT".into(),
+        _ => fallback.to_owned(),
+    }
+}
+
+fn error_code(text: &str) -> &str {
+    for code in ["usage_limit_exceeded", "key_not_supported", "insufficient_credits", "unauthorized", "forbidden"] {
+        if text.contains(code) {
+            return code;
+        }
+    }
+    ""
+}
+
 fn format_http(status: u16, body: &str) -> String {
     let body = body.trim();
     if let Ok(value) = serde_json::from_str::<Value>(body) {
-        let code = value.get("code").and_then(Value::as_str).unwrap_or("");
-        let message = value.get("message").and_then(Value::as_str).unwrap_or(body);
+        let error = value.get("error").unwrap_or(&value);
+        let code = error
+            .get("code")
+            .or_else(|| value.get("code"))
+            .and_then(Value::as_str)
+            .unwrap_or("");
+        let message = error
+            .get("message")
+            .or_else(|| value.get("message"))
+            .and_then(Value::as_str)
+            .unwrap_or(body);
+        let mapped = friendly_error(code, "");
+        if mapped == "USAGE_LIMIT" || mapped == "KEY_NOT_SUPPORTED" {
+            return mapped;
+        }
         if code.is_empty() {
             format!("HTTP {status}: {message}")
         } else {

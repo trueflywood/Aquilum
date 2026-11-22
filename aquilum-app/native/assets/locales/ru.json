@@ -113,7 +113,9 @@
     "welcome": "Чат внутри Aquilum. Skills лежат в папке Skills этой базы знаний.",
     "noBase": "Откройте базу знаний, чтобы пользоваться чатом",
     "toolLine": "Инструмент: {{name}}",
-    "cloudError": "Cursor API: {{error}}"
+    "cloudError": "Cursor API: {{error}}",
+    "cloudUsageLimit": "На аккаунте Cursor закончился prepaid-баланс. Пополните или включите auto top-up в Billing.",
+    "cloudKeyUnsupported": "Этот API-ключ не подходит для Cloud Agents. Создайте ключ на cursor.com/dashboard/api"
   },
   "history": {
     "title": "История",

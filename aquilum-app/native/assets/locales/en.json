@@ -111,7 +111,9 @@
     "welcome": "Chat inside Aquilum. Skills live in the Skills folder of this knowledge base.",
     "noBase": "Open a knowledge base to use chat",
     "toolLine": "Tool: {{name}}",
-    "cloudError": "Cursor API: {{error}}"
+    "cloudError": "Cursor API: {{error}}",
+    "cloudUsageLimit": "Your Cursor prepaid balance is used up. Add funds or enable auto top-up in Billing.",
+    "cloudKeyUnsupported": "This API key cannot use Cloud Agents. Create a key at cursor.com/dashboard/api"
   },
   "history": {
     "title": "History",

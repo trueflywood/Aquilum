@@ -94,7 +94,7 @@ impl App {
                 report!("Cursor Cloud Agents: {error}");
                 self.chat.messages.push(Message {
                     role: Role::System,
-                    content: crate::i18n::t_with("chat.cloudError", &[("error", &error)]),
+                    content: cloud_error_text(&error),
                 });
             }
         }
@@ -178,5 +178,13 @@ impl App {
             ..ChatState::default()
         };
         self.render_chat(root);
+    }
+}
+
+fn cloud_error_text(error: &str) -> String {
+    match error.trim() {
+        "USAGE_LIMIT" => crate::i18n::t("chat.cloudUsageLimit"),
+        "KEY_NOT_SUPPORTED" => crate::i18n::t("chat.cloudKeyUnsupported"),
+        other => crate::i18n::t_with("chat.cloudError", &[("error", other)]),
     }
 }

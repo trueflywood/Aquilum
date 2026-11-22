@@ -1,7 +1,7 @@
 {
   "name": "aquilum-app",
   "private": true,
-  "version": "0.3.33",
+  "version": "0.3.34",
   "license": "AGPL-3.0-only",
   "scripts": {
     "dev": "powershell -NoProfile -ExecutionPolicy Bypass -File native/scripts/watch.ps1"
