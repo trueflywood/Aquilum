@@ -5,6 +5,7 @@ use crate::chat::{CursorModels, choice_at, set_choices};
 use crate::i18n::{t, t_with};
 
 pub(super) const DEFAULT_SKILLS_FOLDER: &str = "Skills";
+const API_KEYS_URL: &str = "https://cursor.com/dashboard/api";
 
 pub fn skills_path(workspace: &Path, folder: &str) -> PathBuf {
     let value = folder.trim();
@@ -33,6 +34,14 @@ pub(super) fn agent(config: &AppConfig, ctx: &Context) -> Vec<Block> {
                 commit: true,
             },
             |c, v| c.agent.api_key = text(v),
+        ),
+        info(
+            t("settings.agent.apiKeyPage"),
+            Some(t("settings.agent.apiKeyPageHint")),
+            Control::Buttons(vec![Button::new(
+                t("settings.agent.apiKeyPageButton"),
+                Action::OpenUrl(API_KEYS_URL.to_owned()),
+            )]),
         ),
         model_row(config, &ctx.cursor_models),
         row(
