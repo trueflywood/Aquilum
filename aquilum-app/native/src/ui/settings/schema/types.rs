@@ -37,12 +37,29 @@ pub struct Context {
     pub sync_size: Size,
     pub sync_due: Option<Instant>,
     pub sync_last: Option<u64>,
+    pub cursor_models: crate::chat::CursorModels,
 }
 
 impl Context {
     #[cfg(test)]
     pub fn new(scale: f64) -> Self {
-        Context { workspace: None, scale, home_page: String::new(), mcp: None, copied: None, trash_page: 0, autostart: None, update: None, sync: SyncStatus::Off(None), vault_sync: None, sync_large: Vec::new(), sync_size: Size::default(), sync_due: None, sync_last: None }
+        Context {
+            workspace: None,
+            scale,
+            home_page: String::new(),
+            mcp: None,
+            copied: None,
+            trash_page: 0,
+            autostart: None,
+            update: None,
+            sync: SyncStatus::Off(None),
+            vault_sync: None,
+            sync_large: Vec::new(),
+            sync_size: Size::default(),
+            sync_due: None,
+            sync_last: None,
+            cursor_models: crate::chat::CursorModels::Locked,
+        }
     }
 }
 

@@ -70,10 +70,12 @@ impl App {
             sync_size: self.workspace.core.sync.size(),
             sync_due: self.workspace.core.sync.due(),
             sync_last: self.workspace.core.sync.last(),
+            cursor_models: self.cursor_models.status.clone(),
         }
     }
 
     pub(in crate::app) fn show_settings(&mut self, root: &mut RenderRoot, section: Section) {
+        self.request_cursor_models();
         let config = self.workspace.core.settings.get_config();
         let ctx = self.settings_context(None, 0);
         let (layer, dialog) = settings::dialog(&config, &ctx, section);

@@ -62,6 +62,9 @@ impl App {
         dialog.copied = None;
         dialog.trash_page = 0;
         self.interface.set_settings_section(section.key());
+        if section == Section::Agent {
+            self.request_cursor_models();
+        }
         let config = self.workspace.core.settings.get_config();
         let ctx = self.settings_context(None, 0);
         let (content, bindings) = settings::content(&config, &ctx, section);

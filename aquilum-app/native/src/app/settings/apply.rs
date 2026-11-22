@@ -144,6 +144,7 @@ impl App {
                 let smart_changed = smart != crate::ui::editor::Smart::from_config(&before);
                 crate::ui::motion::set(after.ui.animations);
                 let agent_changed = before.agent != after.agent;
+                let api_key_changed = before.agent.api_key.trim() != after.agent.api_key.trim();
                 let rows_changed = before.ui.animations != after.ui.animations
                     || (before.ui.theme == "night") != (after.ui.theme == "night")
                     || before.analysis.enable_bm25f != after.analysis.enable_bm25f
@@ -158,6 +159,9 @@ impl App {
                 }
                 if mcp_changed {
                     core.apply_mcp_settings();
+                }
+                if api_key_changed {
+                    self.request_cursor_models();
                 }
                 if retention {
                     self.cleanup_retention();

@@ -6,6 +6,7 @@ pub(crate) use caches::Moment;
 mod commands;
 mod book;
 mod chat;
+mod cursor_models;
 mod confirm;
 mod core_events;
 mod embeds;
@@ -149,6 +150,7 @@ pub struct App {
     history_body: Option<HistoryBody>,
     chat: ChatState,
     chat_body: Option<ChatBindings>,
+    cursor_models: cursor_models::CursorModelsState,
     opened_versions: HashMap<Uuid, crate::history::Version>,
     version_view: Option<VersionView>,
     version_notice: Option<String>,

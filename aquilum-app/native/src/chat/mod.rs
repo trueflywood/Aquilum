@@ -1,4 +1,5 @@
 mod agent;
+mod models;
 mod skills;
 mod ui;
 
@@ -9,6 +10,7 @@ use crate::ui::handle::Handle;
 use crate::ui::search::Placeholder;
 
 pub use agent::run_turn;
+pub use models::{CursorModel, CursorModels, choice_at, list as list_models, set_choices};
 pub use skills::{Skill, load_skills, write_starters};
 pub use ui::{ChatBody, body};
 

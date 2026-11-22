@@ -54,6 +54,39 @@ fn agent_section_offers_skills_create_when_folder_missing() {
 }
 
 #[test]
+fn agent_model_stays_locked_without_api_key_and_opens_after_models_load() {
+    let mut config = AppConfig::default();
+    let mut ctx = Context::new(1.0);
+    let model = |config: &AppConfig, ctx: &Context| {
+        blocks(Section::Agent, config, ctx)
+            .into_iter()
+            .flat_map(|b| b.rows)
+            .find(|r| r.label == t("settings.agent.model"))
+            .expect("model row")
+    };
+    let locked = model(&config, &ctx);
+    assert!(locked.setter.is_none());
+    assert_eq!(
+        locked.control,
+        Control::Dropdown {
+            options: vec![t("settings.agent.modelLocked")],
+            selected: 0
+        }
+    );
+
+    ctx.cursor_models = crate::chat::CursorModels::Ready(vec![crate::chat::CursorModel {
+        id: "claude-4-sonnet".into(),
+        label: "Claude 4 Sonnet".into(),
+    }]);
+    config.agent.api_key = "key".into();
+    let ready = model(&config, &ctx);
+    assert!(ready.setter.is_some());
+    let Control::Dropdown { options, selected } = ready.control else { panic!("dropdown") };
+    assert_eq!(options, [t("settings.agent.modelDefault"), "Claude 4 Sonnet".into()]);
+    assert_eq!(selected, 0);
+}
+
+#[test]
 fn font_lists_start_with_the_bundled_families_and_go_on_with_installed_ones() {
     let list = families(&EDITOR_FAMILIES);
     assert_eq!(list[..3], ["iA Writer Mono", "iA Writer Quattro", "Inter"]);

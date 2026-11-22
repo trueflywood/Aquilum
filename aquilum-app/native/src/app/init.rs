@@ -51,6 +51,7 @@ impl App {
             history_body: None,
             chat: Default::default(),
             chat_body: None,
+            cursor_models: Default::default(),
             opened_versions: HashMap::new(),
             version_view: None,
             version_notice: None,

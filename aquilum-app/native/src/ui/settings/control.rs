@@ -145,8 +145,10 @@ pub(super) fn control_widget(row: &Row, bindings: &mut HashMap<WidgetId, Binding
             let widget = DropdownButton::new(options.get(*selected).map_or("", String::as_str));
             if let Some(setter) = setter {
                 bindings.insert(widget.id(), Binding::Dropdown { setter, options: options.clone(), selected: *selected });
+                widget.erased()
+            } else {
+                widget.disabled(true).erased()
             }
-            widget.erased()
         }
         Control::Number(number) if number.stepper => stepper_input(bindings, setter, number),
         Control::Number(number) => {

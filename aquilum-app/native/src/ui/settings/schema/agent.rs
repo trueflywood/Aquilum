@@ -1,6 +1,7 @@
 use std::path::{Path, PathBuf};
 
 use super::*;
+use crate::chat::{CursorModels, choice_at, set_choices};
 use crate::i18n::{t, t_with};
 
 pub(super) const DEFAULT_SKILLS_FOLDER: &str = "Skills";
@@ -29,19 +30,11 @@ pub(super) fn agent(config: &AppConfig, ctx: &Context) -> Vec<Block> {
             Some(t("settings.agent.apiKeyHint")),
             Control::Text {
                 value: config.agent.api_key.clone(),
-                commit: false,
+                commit: true,
             },
             |c, v| c.agent.api_key = text(v),
         ),
-        row(
-            t("settings.agent.model"),
-            Some(t("settings.agent.modelHint")),
-            Control::Text {
-                value: config.agent.model.clone(),
-                commit: false,
-            },
-            |c, v| c.agent.model = text(v),
-        ),
+        model_row(config, &ctx.cursor_models),
         row(
             t("settings.agent.skillsFolder"),
             Some(t("settings.agent.skillsFolderHint")),
@@ -74,4 +67,55 @@ pub(super) fn agent(config: &AppConfig, ctx: &Context) -> Vec<Block> {
         title: t("settings.agent.section"),
         rows,
     }]
+}
+
+fn model_row(config: &AppConfig, models: &CursorModels) -> Row {
+    let label = t("settings.agent.model");
+    match models {
+        CursorModels::Locked => info(
+            label,
+            Some(t("settings.agent.modelNeedKey")),
+            Control::Dropdown {
+                options: vec![t("settings.agent.modelLocked")],
+                selected: 0,
+            },
+        ),
+        CursorModels::Loading => info(
+            label,
+            Some(t("settings.agent.modelLoading")),
+            Control::Dropdown {
+                options: vec![t("settings.agent.modelLoading")],
+                selected: 0,
+            },
+        ),
+        CursorModels::Failed(error) => info(
+            label,
+            Some(t_with("settings.agent.modelFailed", &[("error", error)])),
+            Control::Dropdown {
+                options: vec![t("settings.agent.modelLocked")],
+                selected: 0,
+            },
+        ),
+        CursorModels::Ready(items) => {
+            let mut ids = vec![String::new()];
+            let mut options = vec![t("settings.agent.modelDefault")];
+            for model in items {
+                ids.push(model.id.clone());
+                options.push(model.label.clone());
+            }
+            let current = config.agent.model.trim();
+            if !current.is_empty() && !ids.iter().any(|id| id == current) {
+                ids.push(current.to_owned());
+                options.push(current.to_owned());
+            }
+            let selected = ids.iter().position(|id| id == current).unwrap_or(0);
+            set_choices(ids);
+            row(
+                label,
+                Some(t("settings.agent.modelHint")),
+                Control::Dropdown { options, selected },
+                |c, v| c.agent.model = choice_at(index(v)),
+            )
+        }
+    }
 }
