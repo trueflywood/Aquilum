@@ -413,7 +413,7 @@ jobs:
     env:
       NDK_VERSION: 29.0.14206865
       BUILD_TOOLS: 36.0.0
-      CERT_SHA256: 9320626c669c4b0bb90685b40a3efb78c1b5473faa174b785cce06578f8c39f6
+      CERT_SHA256: 789124994844930826546b85da087aed3417d84f53411a2c16ac2434b06c4554
     steps:
       - uses: actions/checkout@v7
         with:
