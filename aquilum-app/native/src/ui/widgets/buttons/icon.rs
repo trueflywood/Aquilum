@@ -173,9 +173,10 @@ pub fn paint_glyph(painter: &mut Painter<'_>, bounds: Rect, icon: Icon, backgrou
 }
 
 pub fn paint_alert_dot(painter: &mut Painter<'_>, bounds: Rect) {
+    let t = theme::current();
     let radius = size::SPACE_4;
     let dot = Circle::new(Point::new(bounds.x1 - radius - 1.0, bounds.y0 + radius + 1.0), radius);
-    painter.fills(dot, theme::current().icon_danger).draw();
+    painter.fill(dot, t.icon_danger).draw();
 }
 
 pub fn paint_icon(painter: &mut Painter<'_>, bounds: Rect, icon: Icon, hovered: bool, alpha: f32, tint: Option<Color>) {
