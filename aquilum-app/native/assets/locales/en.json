@@ -401,6 +401,7 @@
       "offline": "No connection to Dropbox",
       "offlineRetry": "No connection to Dropbox · retrying in {{time}}",
       "unsynced": "Not synced: {{files}} · {{error}}",
+      "caseConflict": "Sync stopped: file paths differ only by letter case. Keep one of them:\n{{paths}}",
       "enabled": "Sync this knowledge base",
       "next": "Next sync in {{time}}",
       "every": {

@@ -55,6 +55,7 @@ fn status(ctx: &Context) -> String {
         SyncStatus::Deletions { planned, synced } => t_with("settings.sync.deletions", &[("planned", &planned.to_string()), ("synced", &synced.to_string())]),
         SyncStatus::Offline => t("settings.sync.offline"),
         SyncStatus::Unsynced { files, first } => t_with("settings.sync.unsynced", &[("files", &plural("settings.trash.files", *files as u64)), ("error", first)]),
+        SyncStatus::CaseConflict { paths } => t_with("settings.sync.caseConflict", &[("paths", &paths.join("\n"))]),
         SyncStatus::Running(_) | SyncStatus::Ready => match ctx.sync_last {
             Some(at) => t_with("settings.sync.done", &[("time", &crate::dates::date_time(at))]),
             None => t("settings.sync.connected"),
@@ -87,7 +88,7 @@ fn provider(ctx: &Context, enabled: bool) -> Control {
         SyncStatus::Running(_) => Some(Indicator::Syncing),
         SyncStatus::Ready => ctx.sync_last.map(|_| Indicator::Synced),
         SyncStatus::Offline => None,
-        SyncStatus::Unsynced { .. } | SyncStatus::Failed(_) => Some(Indicator::Failed),
+        SyncStatus::Unsynced { .. } | SyncStatus::Failed(_) | SyncStatus::CaseConflict { .. } => Some(Indicator::Failed),
     };
     match indicator.filter(|_| enabled) {
         Some(indicator) => Control::Indicated(vec![disconnect()], indicator),

@@ -18,6 +18,7 @@ pub enum SyncStatus {
     Offline,
     Unsynced { files: usize, first: String },
     Failed(String),
+    CaseConflict { paths: Vec<String> },
 }
 
 #[derive(Default)]
@@ -71,6 +72,7 @@ impl State {
                 None => Some(SyncStatus::Offline),
             },
             Err(SyncError::Deletions { planned, synced }) => Some(SyncStatus::Deletions { planned, synced }),
+            Err(SyncError::CaseConflict { paths }) => Some(SyncStatus::CaseConflict { paths }),
             Err(error) if offline(&error) => Some(SyncStatus::Offline),
             Err(error) => Some(SyncStatus::Failed(error.to_string())),
         };

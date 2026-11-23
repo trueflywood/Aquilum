@@ -7,9 +7,25 @@ use crate::ui::editor::TextEditor;
 use crate::ui::scroll::ScrollArea;
 use crate::ui::settings::schema::Section;
 use crate::ui::settings::{self, Binding, SettingsDialog};
-use crate::ui::widgets::{ItemButton, Label};
+use crate::ui::widgets::{IconButton, ItemButton, Label};
+use aquilum_core::sync::SyncStatus;
 
 impl App {
+    pub(in crate::app) fn refresh_sync_alerts(&mut self, root: &mut RenderRoot) {
+        let alert = matches!(self.workspace.core.sync.status(), SyncStatus::CaseConflict { .. });
+        if let Some(chrome) = &self.chrome {
+            for button in [chrome.toggle_sidebar, chrome.drawer, chrome.settings, chrome.rail_settings] {
+                root.edit_widget(button, |mut w| IconButton::set_alert(&mut w.downcast(), alert));
+            }
+        }
+        if let Some(Popup::Settings { dialog, .. }) = &self.popup {
+            for &(nav, section) in &dialog.nav {
+                let mark = alert && section == Section::Sync;
+                root.edit_widget(nav, |mut w| ItemButton::set_alert(&mut w.downcast(), mark));
+            }
+        }
+    }
+
     pub(super) fn reload_settings(&mut self, root: &mut RenderRoot) {
         let Some(Popup::Settings { dialog, menu }) = self.popup.take_if(|popup| matches!(popup, Popup::Settings { .. })) else { return };
         if let Some(menu) = menu {
@@ -19,7 +35,7 @@ impl App {
         let travel = travels(root, &dialog.bindings);
         let config = self.workspace.core.settings.get_config();
         let ctx = self.settings_context(dialog.copied, dialog.trash_page);
-        let (card, finish) = settings::card(&config, &ctx, dialog.section);
+        let (card, finish) = settings::card(&config, &ctx, dialog.section, settings::sync_alert(&ctx));
         root.edit_widget(dialog.layer, |mut w| Modal::set_card(&mut w.downcast(), card, &crate::i18n::t("settings.title")));
         let fresh = SettingsDialog { listing: dialog.listing, ..finish(dialog.layer) };
         root.focus_on(Some(fresh.layer));
@@ -89,6 +105,7 @@ impl App {
         dialog.bindings = bindings;
         dialog.content.edit(root, |mut area| ScrollArea::set_child(&mut area, content));
         resume_travels(root, &dialog.bindings, &travel);
+        self.refresh_sync_alerts(root);
         self.refocus(root);
     }
 }

@@ -4,6 +4,8 @@ mod conflict;
 mod cycle;
 mod decide;
 pub mod dropbox;
+mod casing;
+mod fold;
 mod halt;
 mod measure;
 mod oauth;
@@ -28,6 +30,7 @@ pub use progress::{Count, Progress, Stage};
 pub use oauth::{Client, Login, Tokens};
 pub use records::{Large, Memory, Records, Size};
 pub use remote::{Delta, Remote, RemoteError, RemoteFile, RemoteResult};
+pub use fold::{fold_path, local_case_conflicts, same_fold};
 pub use service::SyncService;
 pub use state::SyncStatus;
 
@@ -41,6 +44,7 @@ pub enum SyncError {
     File(FileCommandError),
     Changed,
     Deletions { planned: usize, synced: usize },
+    CaseConflict { paths: Vec<String> },
 }
 
 impl fmt::Display for SyncError {
@@ -51,6 +55,7 @@ impl fmt::Display for SyncError {
             Self::File(error) => write!(formatter, "{error}"),
             Self::Changed => formatter.write_str("файл изменился во время синхронизации"),
             Self::Deletions { planned, synced } => write!(formatter, "удаляется {planned} из {synced} файлов, синхронизация остановлена"),
+            Self::CaseConflict { paths } => write!(formatter, "файлы отличаются только регистром: {}", paths.join(", ")),
         }
     }
 }

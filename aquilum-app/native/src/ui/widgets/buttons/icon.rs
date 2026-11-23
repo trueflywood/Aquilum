@@ -20,12 +20,13 @@ pub struct IconButton {
     pressed: Option<bool>,
     white: bool,
     inline: bool,
+    alert: bool,
     size: ControlSize,
 }
 
 impl IconButton {
     pub fn new(icon: Icon, label: impl Into<String>) -> Self {
-        IconButton { icon, label: label.into(), press: Press::default(), pressed: None, white: false, inline: false, size: ControlSize::S.fit() }
+        IconButton { icon, label: label.into(), press: Press::default(), pressed: None, white: false, inline: false, alert: false, size: ControlSize::S.fit() }
     }
 
     pub fn mode(icon: Icon, label: impl Into<String>, pressed: bool) -> Self {
@@ -34,6 +35,13 @@ impl IconButton {
 
     pub fn white(icon: Icon, label: impl Into<String>) -> Self {
         IconButton { white: true, ..Self::new(icon, label) }
+    }
+
+    pub fn set_alert(this: &mut WidgetMut<'_, Self>, alert: bool) {
+        if this.widget.alert != alert {
+            this.widget.alert = alert;
+            this.ctx.request_paint_only();
+        }
     }
 
     pub fn small(self) -> Self {
@@ -111,6 +119,9 @@ impl Widget for IconButton {
             }
             let (glyph, stroke) = self.size.glyph(false);
             self.icon.draw(painter, bounds.center() - Vec2::new(glyph / 2.0, glyph / 2.0), glyph, stroke, t.icon_muted);
+            if self.alert {
+                paint_alert_dot(painter, bounds);
+            }
             return;
         }
         let idle = match self.pressed {
@@ -131,6 +142,9 @@ impl Widget for IconButton {
         };
         let (glyph, stroke) = self.size.glyph(self.pressed.is_some());
         paint_glyph(painter, bounds, self.icon, background, color, glyph, stroke);
+        if self.alert {
+            paint_alert_dot(painter, bounds);
+        }
     }
 
     fn get_cursor(&self, _ctx: &QueryCtx<'_>, _pos: Point) -> CursorIcon {
@@ -156,6 +170,12 @@ pub fn paint_glyph(painter: &mut Painter<'_>, bounds: Rect, icon: Icon, backgrou
         painter.fill(RoundedRect::from_rect(bounds, size::ROUNDED_LG), bg).draw();
     }
     icon.draw(painter, bounds.center() - Vec2::new(glyph / 2.0, glyph / 2.0), glyph, stroke, color);
+}
+
+pub fn paint_alert_dot(painter: &mut Painter<'_>, bounds: Rect) {
+    let radius = size::SPACE_4;
+    let center = Point::new(bounds.x1 - radius - 1.0, bounds.y0 + radius + 1.0);
+    painter.fills(masonry::kurbo::Circle::new(center, radius), theme::current().icon_danger).draw();
 }
 
 pub fn paint_icon(painter: &mut Painter<'_>, bounds: Rect, icon: Icon, hovered: bool, alpha: f32, tint: Option<Color>) {

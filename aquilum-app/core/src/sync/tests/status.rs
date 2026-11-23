@@ -25,3 +25,10 @@ fn file_errors_are_summed_up_with_the_first_real_one() {
     assert_eq!(settled(Ok(failed)), SyncStatus::Unsynced { files: 3, first: "Два.md: Dropbox 400: плохо".into() });
     assert_eq!(settled(Err(RemoteError::Failed("папка пропала".into()))), SyncStatus::Failed("папка пропала".into()));
 }
+
+#[test]
+fn case_conflicts_stay_as_their_own_status() {
+    let mut state = State::default();
+    state.settle(Err(SyncError::CaseConflict { paths: vec!["Note.md".into(), "note.md".into()] }));
+    assert_eq!(state.status(true), SyncStatus::CaseConflict { paths: vec!["Note.md".into(), "note.md".into()] });
+}

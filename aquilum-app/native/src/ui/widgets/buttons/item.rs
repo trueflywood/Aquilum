@@ -18,15 +18,21 @@ pub struct ItemButton {
     line: text::Line,
     press: Press,
     active: bool,
+    alert: bool,
 }
 
 impl ItemButton {
     pub fn new(icon: Icon, text: impl Into<String>) -> Self {
-        ItemButton { icon, text: text.into(), line: text::Line::default(), press: Press::default(), active: false }
+        ItemButton { icon, text: text.into(), line: text::Line::default(), press: Press::default(), active: false, alert: false }
     }
 
     pub fn active(mut self, active: bool) -> Self {
         self.active = active;
+        self
+    }
+
+    pub fn alert(mut self, alert: bool) -> Self {
+        self.alert = alert;
         self
     }
 
@@ -35,6 +41,13 @@ impl ItemButton {
             this.widget.active = active;
             this.ctx.request_paint_only();
             this.ctx.request_accessibility_update();
+        }
+    }
+
+    pub fn set_alert(this: &mut WidgetMut<'_, Self>, alert: bool) {
+        if this.widget.alert != alert {
+            this.widget.alert = alert;
+            this.ctx.request_paint_only();
         }
     }
 }
@@ -95,6 +108,9 @@ impl Widget for ItemButton {
         let layout = self.line.layout(ctx, &self.text, available, text::Style::ui(slot));
         let origin = Affine::translate((bounds.x0 + text_x, bounds.center().y - slot / 2.0));
         render_text(painter, origin, layout, &[t.sidebar_text.into()], true);
+        if self.alert {
+            super::icon::paint_alert_dot(painter, bounds);
+        }
     }
 
     fn get_cursor(&self, _ctx: &QueryCtx<'_>, _pos: Point) -> CursorIcon {

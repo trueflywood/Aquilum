@@ -1,4 +1,6 @@
+use super::casing;
 use super::decide::{settle, Action};
+use super::fold::local_case_conflicts;
 use super::halt::Halt;
 use super::progress::Progress;
 use super::measure::survey;
@@ -61,16 +63,21 @@ pub fn run(vault: &Vault<'_>) -> Result<Outcome, SyncError> {
     let _ = fs::remove_dir_all(vault.staging);
     let remote = Halt { inner: vault.remote, watch: vault.watch };
     let vault = &Vault { remote: &remote, ..*vault };
-    let records = vault.records.all()?;
-    let local = survey(vault, &records)?;
+    let mut records = vault.records.all()?;
+    let mut local = survey(vault, &records)?;
     let mut outcome = Outcome::default();
     if stopped(vault, &mut outcome) {
         return Ok(outcome);
     }
-    let (view, cursor) = observe(vault)?;
+    let conflicts = local_case_conflicts(local.files.keys());
+    if !conflicts.is_empty() {
+        return Err(SyncError::CaseConflict { paths: conflicts });
+    }
+    let (mut view, cursor) = observe(vault)?;
     if view.emptied() && !records.is_empty() {
         return Err(RemoteError::Failed("папка в облаке пуста или пропала, а файлы уже синхронизировались — проход остановлен".into()).into());
     }
+    casing::resolve(vault, &mut local, &mut view, &mut records)?;
     let paths: BTreeSet<&String> = local.files.keys().chain(view.paths()).chain(records.keys()).filter(|path| !local.kept.contains(*path)).collect();
     let mut plan = Vec::new();
     for path in paths {

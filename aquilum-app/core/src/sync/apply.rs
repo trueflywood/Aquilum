@@ -87,7 +87,18 @@ pub fn upload(net: &Net<'_>, facts: &Facts<'_>) -> Result<(String, RemoteFile), 
     let local = present(facts.local)?;
     let hash = local_hash(net.root, facts)?;
     let content = FileContent::open(&absolute(net.root, facts.path))?;
-    Ok((hash, net.remote.upload(facts.path, &content, local.modified, facts.remote)?))
+    match net.remote.upload(facts.path, &content, local.modified, facts.remote) {
+        Ok(uploaded) => Ok((hash, uploaded)),
+        Err(RemoteError::Stale) => match facts.remote {
+            Some(remote) if super::fold::same_fold(&remote.path, facts.path) && remote.path != facts.path => {
+                net.remote.delete(remote)?;
+                let content = FileContent::open(&absolute(net.root, facts.path))?;
+                Ok((hash, net.remote.upload(facts.path, &content, local.modified, None)?))
+            }
+            _ => Err(RemoteError::Stale.into()),
+        },
+        Err(error) => Err(error.into()),
+    }
 }
 
 pub fn stage(net: &Net<'_>, remote: &RemoteFile) -> Result<Staged, SyncError> {

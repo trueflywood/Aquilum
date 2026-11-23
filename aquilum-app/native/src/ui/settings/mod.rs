@@ -70,7 +70,7 @@ impl SettingsDialog {
 
     pub fn fit(&mut self, root: &mut RenderRoot, screen: Screen) {
         if screen.compact != self.screen.compact {
-            let (column, ids) = nav(self.section, screen.compact);
+            let (column, ids) = nav(self.section, screen.compact, false);
             self.list.edit(root, |mut area| ScrollArea::set_child(&mut area, column));
             self.nav = ids;
         }
@@ -101,18 +101,23 @@ fn card_size(room: Size) -> Size {
 }
 
 pub fn dialog(config: &AppConfig, ctx: &Context, section: Section) -> (NewWidget<Modal>, SettingsDialog) {
-    let (card, finish) = card(config, ctx, section);
+    let (card, finish) = card(config, ctx, section, sync_alert(ctx));
     let layer = Modal::new(card, &t("settings.title"), CardSize::Window(card_size), Role::Dialog, false);
     let dialog = finish(layer.id());
     (layer, dialog)
 }
 
-fn nav(section: Section, compact: bool) -> (NewWidget<Flex>, Vec<(WidgetId, Section)>) {
+pub fn sync_alert(ctx: &Context) -> bool {
+    matches!(ctx.sync, aquilum_core::sync::SyncStatus::CaseConflict { .. })
+}
+
+fn nav(section: Section, compact: bool, sync_alert: bool) -> (NewWidget<Flex>, Vec<(WidgetId, Section)>) {
     let height = Length::px(if compact { size::SIZE_48 } else { size::SIZE_32 });
     let mut column = Flex::column().cross_axis_alignment(CrossAxisAlignment::Stretch);
     let mut ids = Vec::new();
     for &item in Section::ALL {
-        let button = NewWidget::new(ItemButton::new(item.icon(), item.label()).active(item == section));
+        let alert = sync_alert && item == Section::Sync;
+        let button = NewWidget::new(ItemButton::new(item.icon(), item.label()).active(item == section).alert(alert));
         ids.push((button.id(), item));
         column = column.with_fixed(NewWidget::new(SizedBox::new(button).height(height)));
     }
@@ -122,7 +127,7 @@ fn nav(section: Section, compact: bool) -> (NewWidget<Flex>, Vec<(WidgetId, Sect
     (column, ids)
 }
 
-pub fn card(config: &AppConfig, ctx: &Context, section: Section) -> (NewWidget<Flex>, impl FnOnce(WidgetId) -> SettingsDialog) {
+pub fn card(config: &AppConfig, ctx: &Context, section: Section, sync_alert: bool) -> (NewWidget<Flex>, impl FnOnce(WidgetId) -> SettingsDialog) {
     let close = NewWidget::new(IconButton::new(icons::X, t("settings.close")));
     let close_sub = NewWidget::new(IconButton::new(icons::X, t("settings.close")));
     let back = NewWidget::new(IconButton::new(icons::ARROW_LEFT, t("settings.back")));
@@ -133,7 +138,7 @@ pub fn card(config: &AppConfig, ctx: &Context, section: Section) -> (NewWidget<F
         PropertySet::new().with(Gap::new(Length::px(size::GAP_LG))).with(Padding::from_vh(Length::px(size::GAP_MD), Length::px(size::GAP_LG))),
     );
 
-    let (column, nav_ids) = nav(section, false);
+    let (column, nav_ids) = nav(section, false, sync_alert);
     let list = NewWidget::new(ScrollArea::new(column));
     let (blocks, bindings) = content(config, ctx, section);
     let content = NewWidget::new(ScrollArea::new(blocks));

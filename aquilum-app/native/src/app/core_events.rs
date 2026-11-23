@@ -39,6 +39,7 @@ impl App {
             match event {
                 CoreEvent::Navigate(navigation) => navigations.push(navigation),
                 CoreEvent::SyncChanged => {
+                    self.refresh_sync_alerts(root);
                     self.refresh_section(root, crate::ui::settings::schema::Section::Sync);
                     crate::system::show_sync(&self.workspace.core.sync);
                 }

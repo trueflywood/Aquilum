@@ -86,6 +86,7 @@ impl App {
         if let Some(Popup::Settings { dialog, .. }) = &mut self.popup {
             dialog.fit(root, screen);
         }
+        self.refresh_sync_alerts(root);
     }
 
     pub(super) fn rebuild(&mut self, root: &mut RenderRoot) {

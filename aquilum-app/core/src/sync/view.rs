@@ -1,4 +1,5 @@
 use super::cycle::Vault;
+use super::fold::{fold_path, same_fold};
 use super::records::Record;
 use super::remote::RemoteFile;
 use super::SyncError;
@@ -18,9 +19,27 @@ impl View {
 
     pub fn get<'a>(&'a self, path: &str, record: Option<&'a Record>) -> Option<&'a RemoteFile> {
         match self {
-            Self::Full(files) => files.get(path),
+            Self::Full(files) => by_fold(files, path),
             Self::Delta { changed, removed } => {
-                changed.get(path).or_else(|| record.filter(|_| !removed_with_folder(removed, path)).map(|record| &record.remote))
+                by_fold(changed, path).or_else(|| record.filter(|_| !removed_with_folder(removed, path)).map(|record| &record.remote))
+            }
+        }
+    }
+
+    pub fn remove_fold(&mut self, path: &str) -> Option<RemoteFile> {
+        match self {
+            Self::Full(files) | Self::Delta { changed: files, .. } => {
+                let key = files.keys().find(|key| same_fold(key, path)).cloned()?;
+                files.remove(&key)
+            }
+        }
+    }
+
+    pub fn insert(&mut self, file: RemoteFile) {
+        match self {
+            Self::Full(files) | Self::Delta { changed: files, .. } => {
+                files.retain(|path, _| !same_fold(path, &file.path));
+                files.insert(file.path.clone(), file);
             }
         }
     }
@@ -30,8 +49,17 @@ impl View {
     }
 }
 
+fn by_fold<'a>(files: &'a HashMap<String, RemoteFile>, path: &str) -> Option<&'a RemoteFile> {
+    files.get(path).or_else(|| files.iter().find_map(|(key, file)| same_fold(key, path).then_some(file)))
+}
+
 fn removed_with_folder(removed: &HashSet<String>, path: &str) -> bool {
-    !removed.is_empty() && path.match_indices('/').map(|(end, _)| &path[..end]).chain([path]).any(|prefix| removed.contains(prefix))
+    !removed.is_empty()
+        && path
+            .match_indices('/')
+            .map(|(end, _)| &path[..end])
+            .chain([path])
+            .any(|prefix| removed.iter().any(|gone| same_fold(gone, prefix) || fold_path(path).starts_with(&format!("{}/", fold_path(gone)))))
 }
 
 pub fn observe(vault: &Vault<'_>) -> Result<(View, String), SyncError> {
