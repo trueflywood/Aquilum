@@ -4,7 +4,7 @@ use masonry::core::{
     Widget, WidgetMut,
 };
 use masonry::imaging::Painter;
-use masonry::kurbo::{Axis, Point, Rect, RoundedRect, Size, Stroke, Vec2};
+use masonry::kurbo::{Axis, Circle, Point, Rect, RoundedRect, Size, Stroke, Vec2};
 use masonry::peniko::Color;
 use masonry::layout::{LenReq, Length};
 
@@ -174,8 +174,8 @@ pub fn paint_glyph(painter: &mut Painter<'_>, bounds: Rect, icon: Icon, backgrou
 
 pub fn paint_alert_dot(painter: &mut Painter<'_>, bounds: Rect) {
     let radius = size::SPACE_4;
-    let center = Point::new(bounds.x1 - radius - 1.0, bounds.y0 + radius + 1.0);
-    painter.fills(masonry::kurbo::Circle::new(center, radius), theme::current().icon_danger).draw();
+    let dot = Circle::new(Point::new(bounds.x1 - radius - 1.0, bounds.y0 + radius + 1.0), radius);
+    painter.fills(dot, theme::current().icon_danger).draw();
 }
 
 pub fn paint_icon(painter: &mut Painter<'_>, bounds: Rect, icon: Icon, hovered: bool, alpha: f32, tint: Option<Color>) {
