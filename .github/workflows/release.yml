@@ -316,6 +316,18 @@ jobs:
           dpkg-deb -I "$dist/Aquilum_${version}_amd64.deb"
           dpkg-deb -c "$dist/Aquilum_${version}_amd64.deb"
 
+      # Upload before long docker smoke so packages survive a smoke timeout.
+      - uses: actions/upload-artifact@v7
+        with:
+          name: packages-linux
+          path: |
+            dist/*.AppImage
+            dist/*.AppImage.sig
+            dist/*.deb
+            dist/*.deb.sig
+            dist/*.rpm
+            dist/*.rpm.sig
+
       - name: AppImage under a window manager
         timeout-minutes: 10
         run: |
@@ -343,6 +355,7 @@ jobs:
 
       - name: deb and rpm on clean distributions
         timeout-minutes: 25
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -388,17 +401,6 @@ jobs:
           for pid in "${pids[@]}"; do wait "$pid" || failed=1; done
           for log in log-*.txt; do echo "== $log"; cat "$log"; done
           exit $failed
-
-      - uses: actions/upload-artifact@v7
-        with:
-          name: packages-linux
-          path: |
-            dist/*.AppImage
-            dist/*.AppImage.sig
-            dist/*.deb
-            dist/*.deb.sig
-            dist/*.rpm
-            dist/*.rpm.sig
 
       - uses: actions/upload-artifact@v7
         if: always()
